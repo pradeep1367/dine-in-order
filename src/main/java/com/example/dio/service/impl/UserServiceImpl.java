@@ -1,6 +1,11 @@
 package com.example.dio.service.impl;
 
+import com.example.dio.dto.request.RegistrationRequest;
+import com.example.dio.dto.request.UserRequest;
+import com.example.dio.dto.response.UserResponse;
 import com.example.dio.enums.UserRole;
+import com.example.dio.exception.UserNotFoundByIdException;
+import com.example.dio.mapper.UserMapper;
 import com.example.dio.model.Admin;
 import com.example.dio.model.Staff;
 import com.example.dio.model.User;
@@ -9,22 +14,37 @@ import com.example.dio.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import static com.example.dio.enums.UserRole.ADMIN;
-import static com.example.dio.enums.UserRole.STAFF;
-
 @Service
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private  final UserMapper userMapper;
 
     @Override
-    public User registerUser(User user){
-
-        User user2= this.createUserByRole(user.getUserRole());
-        this.mapToNewUser(user,user2);
-        return userRepository.save(user2);
+    public UserResponse registerUser(RegistrationRequest registrationRequest){
+        User user= this.createUserByRole(registrationRequest.getUserRole());
+        userMapper.mapToUserEntity(registrationRequest,user);
+        userRepository.save(user);
+        return userMapper.mapToUserResponse(user);
     }
+
+    @Override
+    public UserResponse findUserById(long userId){
+        User user= userRepository.findById(userId)
+                .orElseThrow(() ->new UserNotFoundByIdException("user not found by id"));
+        return userMapper.mapToUserResponse(user);
+    }
+
+    @Override
+    public UserResponse updateUserById(long userId, UserRequest userRequest) {
+        User existingUser=userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundByIdException(" failed to updated / User not found"));
+        userMapper.mapToNewUser(userRequest,existingUser);
+        userRepository.save(existingUser);
+        return userMapper.mapToUserResponse(existingUser);
+    }
+
 
     private User createUserByRole(UserRole  role)
     {
@@ -36,14 +56,5 @@ public class UserServiceImpl implements UserService {
             default -> throw new RuntimeException("Failed to register");
         }
         return user;
-    }
-
-    private  void mapToNewUser(User user, User user2)
-    {
-        user2.setUserName(user.getUserName());
-        user2.setUserRole(user.getUserRole());
-        user2.setEmail(user.getEmail());
-        user2.setPhoneNo(user.getPhoneNo());
-        user2.setPassword(user.getPassword());
     }
 }
