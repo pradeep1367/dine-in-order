@@ -1,9 +1,10 @@
 package com.example.dio.util;
 
-import com.example.dio.model.User;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.util.List;
 
 public class ResponseBuilder {
 
@@ -28,4 +29,30 @@ public class ResponseBuilder {
 
         return ResponseEntity.status(HttpStatus.CREATED).headers(headers).body(structure);
     }
+
+    public  static ResponseEntity<SimpleErrorResponse> error(HttpStatus status,String message) {
+        SimpleErrorResponse error= SimpleErrorResponse.builder()
+                .type(status.name())
+                .message(message)
+                .status(status.value())
+                .build();
+
+        return ResponseEntity.status(status)
+                .body(error);
+    }
+
+    public static  ResponseEntity<FieldErrorResponse> error(HttpStatus status, String message, List<FieldErrorResponse.CustomFieldError> errors) {
+        FieldErrorResponse error=FieldErrorResponse.builder()
+                .type(status.name())
+                .status(status.value())
+                .message(message)
+                .errors(errors)
+                .build();
+
+
+                return ResponseEntity.status(status)
+                        .body(error);
+    }
+
+
 }

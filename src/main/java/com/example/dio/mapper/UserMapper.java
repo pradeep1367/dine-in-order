@@ -17,8 +17,5 @@ public interface UserMapper {
 
      void mapToUserEntity(UserRequest userRequest, @MappingTarget User user);
 
-     void mapToNewUser(User source, @MappingTarget User target);
-
-    void mapToNewUser(UserRequest source, @MappingTarget User target);
 
 }

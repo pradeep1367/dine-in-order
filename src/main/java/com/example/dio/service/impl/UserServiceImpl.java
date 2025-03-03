@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse updateUserById(long userId, UserRequest userRequest) {
         User existingUser=userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundByIdException(" failed to updated / User not found"));
-        userMapper.mapToNewUser(userRequest,existingUser);
+        userMapper.mapToUserEntity(userRequest,existingUser);
         userRepository.save(existingUser);
         return userMapper.mapToUserResponse(existingUser);
     }
